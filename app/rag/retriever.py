@@ -1,18 +1,37 @@
-from typing import List
 from app.rag.embedding_service import EmbeddingService
 from app.rag.vector_store import VectorStore
 
 
 class Retriever:
     def __init__(self):
-        self.embedding_service = EmbeddingService()
-        self.vector_store = VectorStore()
+        self.embedder = EmbeddingService()
+        self.store = VectorStore()
 
-    def index_documents(self, texts: List[str]):
-        embeddings = self.embedding_service.embed_texts(texts)
-        self.vector_store.add_embeddings(embeddings, texts)
+    def index_documents(self, documents):
+        if not documents:
+            return
 
-    def retrieve(self, query: str, top_k: int = 3) -> List[str]:
-        query_embedding = self.embedding_service.embed_text(query)
-        results = self.vector_store.search(query_embedding, top_k)
-        return results
+        embeddings = self.embedder.embed_texts(documents)
+        self.store.add_embeddings(embeddings, documents)
+
+    def retrieve(self, query, top_k=2):
+        if not self.store.text_chunks:
+            return []
+
+        query_vector = self.embedder.embed_text(query)
+
+        results = self.store.search(
+            query_vector,
+            top_k=top_k
+        )
+
+        # 🔥 FIX: Extract only text from (text, score)
+        cleaned_results = []
+
+        for item in results:
+            if isinstance(item, tuple):
+                cleaned_results.append(item[0])
+            else:
+                cleaned_results.append(item)
+
+        return cleaned_results

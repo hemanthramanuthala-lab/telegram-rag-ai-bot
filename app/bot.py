@@ -1,17 +1,21 @@
 import os
 from telegram.ext import ApplicationBuilder, MessageHandler, filters
-from app.handlers import handle_message
+from app.handlers import handle_message, handle_document
+
 
 def create_telegram_app():
     telegram_token = os.getenv("TELEGRAM_TOKEN")
 
-    if not telegram_token:
-        raise ValueError("TELEGRAM_TOKEN is not set in environment variables.")
+    telegram_app = ApplicationBuilder().token(telegram_token).build()
 
-    app = ApplicationBuilder().token(telegram_token).build()
+    # Document handler FIRST
+    telegram_app.add_handler(
+        MessageHandler(filters.Document.ALL, handle_document)
+    )
 
-    app.add_handler(
+    # Text messages
+    telegram_app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
     )
 
-    return app
+    return telegram_app

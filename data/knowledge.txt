@@ -1,0 +1,7 @@
+RAG stands for Retrieval Augmented Generation.
+
+FastAPI is a modern Python web framework used to build APIs.
+
+Azure OpenAI provides large language models through Microsoft Azure.
+
+Cosmos DB is a globally distributed NoSQL database service.
